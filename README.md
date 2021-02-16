@@ -9,7 +9,7 @@ My challenge was to create a REST API for my implementation of Stack Overflow.
 - User Login, Logout options
 - User Registration
 - Functionality to reset password and verify user email
-- CRUD operations for Posts, Comments, Categories, Likes, Subscribers, Users
+- CRUD operations for Posts, Comments, Categories, Likes, Users
 
 ##**Authentication module**:<br/>
 '
