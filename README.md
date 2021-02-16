@@ -114,4 +114,4 @@ My challenge was to create a REST API for my implementation of Stack Overflow.
 ```
 
 ##Author:<br/>
-**Dmytro Gorkavyi** :bowtie:
+**Dmytro Gorkavyi**
