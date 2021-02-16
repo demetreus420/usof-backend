@@ -1,0 +1,34 @@
+{
+  "name": "usof-back",
+  "version": "1.0.0",
+  "description": "This is my implementation of StackOverflow",
+  "main": "app.js",
+  "scripts": {
+    "dev": "bash dev.bash",
+    "start": "bash start.bash",
+    "test": "bash ./testscript.bash"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.ucode.world:ucode/usof-backend/dgorkavyi.git"
+  },
+  "author": "Dmytro Gorkavyi <dima.net.dd@gmail.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "@prettier/plugin-pug": "^1.13.2",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.2",
+    "nodemailer": "^6.4.17",
+    "nodemon": "^2.0.7",
+    "passport": "^0.4.1",
+    "passport-jwt": "^4.0.0",
+    "pg": "^8.5.1"
+  },
+  "dependencies": {
+    "react": "^17.0.1"
+  }
+}
