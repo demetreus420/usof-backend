@@ -28,7 +28,5 @@
     "passport-jwt": "^4.0.0",
     "pg": "^8.5.1"
   },
-  "dependencies": {
-    "react": "^17.0.1"
-  }
+  "dependencies": {}
 }
