@@ -24,23 +24,25 @@ const upload = multer({
 //get all users
 router.get(
   '/users',
-  /*AUTH--> */ passport.authenticate('jwt', { session: false }),
   user.getAll
 )
 //get specified user data
 router.get(
   '/users/:id',
-  /*AUTH--> */ passport.authenticate('jwt', { session: false }),
+  /*AUTH--> */
   user.getSpecified
 )
-//create new user [login, pass, conf-pass, email, role] obly for admins
+//create new user [login, pass, conf-pass, email, role] only for admins
 router.post(
   '/users',
   /*AUTH--> */ passport.authenticate('jwt', { session: false }),
   user.createNewOne
 )
 // is for authorized user to upload its avatar
-router.post('/users/avatar', upload.any(), user.uploadAvatar)
+router.post('/users/avatar',  
+  passport.authenticate('jwt', { session: false }),
+  upload.any(),
+  user.uploadAvatar)
 //update user data
 router.patch(
   '/users/:id',

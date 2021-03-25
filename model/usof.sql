@@ -16,6 +16,8 @@ CREATE TABLE users(
     fullname varchar(60),
     profilepic VARCHAR(255),
     role VARCHAR(60),
+    about TEXT,
+    location TEXT,
     rating INTEGER DEFAULT 0
 );
 CREATE TABLE posts(

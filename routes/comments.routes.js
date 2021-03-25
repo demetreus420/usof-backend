@@ -15,7 +15,7 @@ router.get(
 //get all likes under the specified comment
 router.get(
   '/comments/:id/like',
-  /*AUTH--> */ passport.authenticate('jwt', { session: false }),
+  // /*AUTH--> */ passport.authenticate('jwt', { session: false }),
   comment.getSpecifiedLikes
 )
 //create a new like under the comment

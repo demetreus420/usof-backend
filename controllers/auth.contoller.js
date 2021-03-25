@@ -14,13 +14,28 @@ class AuthController {
       passwordConfirm,
       fullname,
       email,
-      role,
+      role
     } = req.body
     const loginEmailCheck = await db.query(
       'SELECT * FROM users WHERE login=$1 OR email=$2;',
       [login, email]
     )
+    // console.log(
+    //   `
 
+    //   *-----------------------
+    //     >${login}
+    //     >${password}
+    //     >${passwordConfirm}
+    //     >${fullname}
+    //     >${email}
+    //     >${role}
+
+    //     >LOGIN & EMAIL CHECK: ===> ${!!loginEmailCheck} 
+    //   *-----------------------
+      
+    //   `
+    // );
     if (passwordConfirm != password) {
       res.status(400)
       res.send({ text: 'not indentical passwords' })
@@ -34,16 +49,19 @@ class AuthController {
       
       const newUser = await db.query(
         `INSERT INTO users (login, password, email, role, fullname)
-         VALUES($1, $2, $3, $4, $5) RETURNING *;`,
+         VALUES($1, $2, $3, $4, $5) RETURNING id;`,
         [login, password, email, role, fullname]
       )
+      // console.log('JWT KEY-->' , keys.jwt)
       const token = jwt.sign(
         {
-          email: email,
+          role,
+          email,
           userId: newUser.rows[0].id,
+          expiresIn: Date.now() + 3600000,
         },
         keys.jwt,
-        { expiresIn: 60 * 60 }
+        { expiresIn: '1h' }
       )
       const message = {
         to: email,
@@ -51,8 +69,8 @@ class AuthController {
         html: `<h1>Лови ссылку на подтверждение почты</h1>
               <h2>Тебе нужно пройти по ней</h2>
               <h2>
-                <a href="http://localhost:3000/api/auth/email-confirmation/${token}">
-                  http://localhost:3000/api/auth/email-confirmation/${token}
+                <a href="http://localhost:8080/api/auth/email-confirmation/${token}">
+                  http://localhost:8080/api/auth/email-confirmation/${token}
                 </a>
               </h2>     
         `, // html body
@@ -80,14 +98,15 @@ class AuthController {
           //token generation
           const token = jwt.sign(
             {
-              email: email,
-              userId: userData.rows[0].id,
               role: userData.rows[0].role,
+              email: userData.rows[0].email,
+              userId: userData.rows[0].id,
+              expiresIn: Date.now() + 3600000,
             },
             keys.jwt,
-            { expiresIn: 60 * 60 }
+            { expiresIn: Date.now() + 3600000 } //'1h'
           ) //one hour
-          res.status(200).json({ token: `Bearer ${token}` })
+          res.status(200).json({ token: `Bearer ${token}`, userId: userData.rows[0].id, })
         } else {
           res.status(401).json({
             text: 'uncorrect password',
@@ -118,9 +137,10 @@ class AuthController {
       {
         email: email,
         userId: userData.rows[0].id,
+        expiresIn: Date.now() + 3600000,
       },
       keys.jwt,
-      { expiresIn: 60 * 60 }
+      { expiresIn: '1h' }
     ) //one hour
     const message = {
       to: email,
@@ -129,8 +149,8 @@ class AuthController {
         <h1>Лови жабу...</h1>
         <h2>То есть ссылку на восттановление пароля=)</h2>
         <h2>
-          <a href="http://localhost:3000/api/auth/password-reset-test/${token}">
-            http://localhost:3000/api/auth/password-reset/${token}
+          <a href="http://localhost:8080/api/auth/password-reset-test/${token}">
+            http://localhost:8080/api/auth/password-reset/${token}
           </a>
         </h2>     
       `, // html body
@@ -162,7 +182,6 @@ class AuthController {
       text: 'UPDATE users SET password=$1 WHERE id=$2;',
       values: [newPassword, decoded.userId],
     }
-    console.log(query)
 
     if (req.body.newPassword.length >= 6) {
       await db.query(query)
@@ -191,6 +210,17 @@ class AuthController {
     res.status(200)
     res.send('<h1>Почта подтверждена. Можешь заходить</h1>')
     res.end()
+  }
+
+  async checkToken(req, res) {
+    const token = req.params.token
+    const decoded = token !== 'undefined' ? jwt.verify(token.split(' ')[1], keys.jwt) : '\tundefined!!'
+
+    if (Date.now() - decoded.expiresIn > 0) {
+      res.status(200).json({text: false})
+    } else {
+      res.status(200).json({text: true})
+    }
   }
 }
 

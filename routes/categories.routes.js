@@ -9,19 +9,16 @@ const category = new CategoryController()
 //get all categories
 router.get(
   '/categories',
-  /*AUTH--> */ passport.authenticate('jwt', { session: false }),
   category.getAll
 )
 //get specified category data
 router.get(
   '/categories/:id',
-  /*AUTH--> */ passport.authenticate('jwt', { session: false }),
   category.getSpecified
 )
 //get all posts associated with this category
 router.get(
   '/categories/:id/posts',
-  /*AUTH--> */ passport.authenticate('jwt', { session: false }),
   category.getPostsWithCategory
 )
 //create a new category

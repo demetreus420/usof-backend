@@ -4,22 +4,19 @@ class CategoryController {
   //------------------------------------------------------//
   //
   async getAll(req, res) {
-    if (req.user.role == 'admin') {
       const { rows } = await db.query('SELECT * FROM categories;')
 
       if (!!rows[0]) {
         res.status(200)
         res.send(rows)
       } else {
-        res.status(400)
+        res.send([])
       }
-    }
     res.end()
   }
   //------------------------------------------------------//
   //
   async getSpecified(req, res) {
-    if (req.user.role == 'admin') {
       const id = req.params.id
       const {
         rows,
@@ -33,13 +30,12 @@ class CategoryController {
       } else {
         res.status(400)
       }
-    }
     res.end()
   }
   //------------------------------------------------------//
   //
   async getPostsWithCategory(req, res) {
-    if (req.user.role == 'admin') {
+
       const id = req.params.id
       const {
         rows,
@@ -56,36 +52,36 @@ class CategoryController {
         res.send(posts.rows)
       } else {
         res.status(400)
+        res.send([]);
       }
-    }
     res.end()
   }
   //------------------------------------------------------//
   //
   async createNewOne(req, res) {
-    if (req.user.role == 'admin') {
-      const { title, description } = req.body
-      const checkCategory = await db.query(
-        'SELECT * FROM categories WHERE title=$1;',
-        [title]
-      )
+    const { title, description } = req.body
 
-      if (!checkCategory.rows[0]) {
-        await db.query(
-          'INSERT INTO categories(title, descript) VALUES($1, $2);',
-          [title, description]
-        )
-        res.status(200)
-      } else {
-        res.status(400)
-      }
+    const checkCategory = await db.query(
+      'SELECT * FROM categories WHERE title=$1;',
+      [title]
+    )
+
+    if (!checkCategory.rows[0]) {
+      await db.query(
+        'INSERT INTO categories(title, descript) VALUES($1, $2);',
+        [title, description]
+      )
+      res.status(200)
+    } else {
+      res.status(400)
     }
+
     res.end()
   }
   //------------------------------------------------------//
   //
   async updateSpecified(req, res) {
-    if (req.user.role == 'admin') {
+    if (req.body.user_role == 'admin') {
       const id = req.params.id
       const { title, description } = req.body
       const checkCategory = await db.query(
@@ -107,7 +103,7 @@ class CategoryController {
   //------------------------------------------------------//
   //
   async deleteSpecified(req, res) {
-    if (req.user.role == 'admin') {
+    if (req.body.user_role == 'admin') {
       const id = req.params.id
       const checkCategory = await db.query(
         'SELECT * FROM categories WHERE id=$1;',

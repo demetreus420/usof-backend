@@ -14,10 +14,10 @@ router.post('/auth/register', auth.reg)
 //log in user
 router.post('/auth/login', auth.login)
 //log out user
-router.post('/auth/logout', auth.logout)
-//send a reset link to user email
 router.post('/auth/password-reset', auth.resetPassword)
 //confirm new password with a token from email
 router.post('/auth/password-reset/:token', parser, auth.confirmNewPasswprd)
+//decrypt a token and send false or true if it's time is end
+router.get('/auth/check-token/:token', auth.checkToken)
 
 module.exports = router

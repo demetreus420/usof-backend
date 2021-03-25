@@ -8,31 +8,31 @@ const post = new PostController()
 //get all posts
 router.get(
   '/posts',
-  /*AUTH--> */ passport.authenticate('jwt', { session: false }),
+  // /*AUTH--> */ passport.authenticate('jwt', { session: false }),
   post.getAll
 )
 //get specified post data
 router.get(
   '/posts/:id',
-  /*AUTH--> */ passport.authenticate('jwt', { session: false }),
+  // /*AUTH--> */ passport.authenticate('jwt', { session: false }),
   post.getSpecified
 )
 //get all comments for specified post
 router.get(
   '/posts/:id/comments',
-  /*AUTH--> */ passport.authenticate('jwt', { session: false }),
+  // /*AUTH--> */ passport.authenticate('jwt', { session: false }),
   post.getAllComments
 )
 //get all categories associated with current post
 router.get(
   '/posts/:id/categories',
-  /*AUTH--> */ passport.authenticate('jwt', { session: false }),
+  // /*AUTH--> */ passport.authenticate('jwt', { session: false }),
   post.getAllCategories
 )
 //get all likes under specified post
 router.get(
   '/posts/:id/like',
-  /*AUTH--> */ passport.authenticate('jwt', { session: false }),
+  // /*AUTH--> */ passport.authenticate('jwt', { session: false }),
   post.getAllLikes
 )
 //create a new comment

@@ -1,17 +1,30 @@
 const db = require('../model/db')
 const fs = require('fs')
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcryptjs');
+const { Console } = require('console');
 
 class UserController {
   //------------------------------------------------------//
   //
   async getAll(req, res) {
-    if (req.user.role == 'admin') {
-      const all = await db.query('SELECT * FROM users;')
+    const adminQuery = 'SELECT * FROM users;';
+    const userQuery = 'SELECT id, fullname, role, profilepic, login, rating FROM users;';
+
+    if (req.user && req.user.role == 'admin') {
+      const all = await db.query(adminQuery)
 
       console.log('-->  ', req.user.role)
       if (all.rows.length == 0) {
         res.status(400)
+      } else {
+        res.status(200)
+        res.send(all.rows)
+      }
+    } else {
+      const all = await db.query(userQuery)
+      if (all.rows.length == 0) {
+        res.status(400)
+        res.send([])
       } else {
         res.status(200)
         res.send(all.rows)
@@ -22,19 +35,16 @@ class UserController {
   //------------------------------------------------------//
   //
   async getSpecified(req, res) {
-    if (req.user.role == 'admin') {
-      const id = req.params.id
-      const user = await db.query(
-        'SELECT * FROM users where id = $1;',
-        [id]
-      )
-
-      if (user.rows.length == 0) {
-        res.status(400)
-      } else {
-        res.status(200)
-        res.send(user.rows[0])
-      }
+    const id = req.params.id
+    const user = await db.query(
+      'SELECT id, login, fullname, email, role, about, location, rating, profilepic FROM users where id = $1;',
+      [id]
+    )
+    
+    if (user.rows.length == 0) {
+      res.status(400)
+    } else {
+      res.status(200).json(user.rows[0])
     }
     res.end()
   }
@@ -112,27 +122,35 @@ class UserController {
   //------------------------------------------------------//
   //
   async updateSpecified(req, res) {
-    if (req.user.role == 'admin') {
-      const id = req.params.id
-      let { login, password, passwordConfirm, email, role } = req.body
+    const id = req.params.id
+    const checkId = await db.query(
+      'SELECT * FROM users WHERE id=$1;',
+      [id]
+    )
+    let { login, email, location, role, about, fullName } = req.body
 
-      const checkId = await db.query(
-        'SELECT * FROM users WHERE id=$1;',
-        [id]
+    if (!checkId.rows[0]) {
+      res.status(400).json({text: "NO ID"})
+    } else {
+      let row = await db.query(
+        `UPDATE users SET login=$1, email=$2, role=$3, fullname=$4, location=$5, about=$6 
+      WHERE id=$7 RETURNING *;`,
+        [login, email, role, fullName, location, about, id]
       )
-      if (!checkId.rows[0] || password != passwordConfirm) {
-        res.status(400)
-      } else {
-        const salt = bcrypt.genSaltSync(10)
-        password = bcrypt.hashSync(password, salt)
-        await db.query(
-          `UPDATE users SET login=$1, password=$2, email=$3, role=$4 
-        WHERE id=$5 RETURNING *;`,
-          [login, password, email, role, id]
-        )
-        res.status(200)
+      row = row.rows[0]
+      row = {
+        login: row.login,
+        email: row.email,
+        id: row.id,
+        role: row.role,
+        fullname: row.fullname,
+        about: row.about,
+        location: row.location
       }
+      console.log(row)
+      res.status(200).json(row)
     }
+
     res.end()
   }
   //------------------------------------------------------//

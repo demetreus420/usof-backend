@@ -32,8 +32,9 @@ class CommnetController {
     )
 
     if (specifiedComment.rows[0] && specifiedLikes.rows[0]) {
-      res.status(200)
-      res.send(specifiedLikes.rows)
+      res.status(200).json(specifiedLikes.rows)
+    } else if (specifiedComment.rows[0] && !specifiedLikes.rows[0]){
+      res.status(200).json({likes: 0})
     } else {
       res.status(400)
     }
@@ -52,7 +53,10 @@ class CommnetController {
       'SELECT * FROM comments WHERE id=$1;',
       [id]
     )
-
+    await db.query(
+      'DELETE FROM likes WHERE comment_id=$1 AND author=$2;',
+      [id, author]
+    )
     if (!!author_id.rows[0] && !!commentExist.rows[0]) {
       // const result =
       await db.query(

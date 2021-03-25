@@ -4,29 +4,28 @@ class PostController {
   //------------------------------------------------------//
   //
   async getAll(req, res) {
-    const { rows } = await db.query('SELECT * FROM posts;')
+    let { rows } = await db.query('SELECT * FROM posts;');
+    let likes = await db.query('SELECT * FROM likes;');
 
+    likes = likes.rows;
+    if (!likes) likes = [];
     res.status(200)
     //if u ain't admin u weill get only active posts
-    if (req.user.role !== 'admin') rows = rows.filter(elem.status)
-    res.send(rows)
+    if (req.user && req.user.role !== 'admin') rows = rows.filter(elem.status)
+    res.send({rows, likes})
     res.end()
   }
   //------------------------------------------------------//
   //
   async createNewOne(req, res) {
-    let { title, content, category, author } = req.body
-    const checkAuth = await db.query(
-      'SELECT id FROM users WHERE login=$1;',
-      [author]
-    )
+    let { title, content, category, author, id } = req.body
 
-    if (!!checkAuth.rows[0] && category) {
+    if (category) {
       category = '{' + category.join() + '}'
       await db.query(
         `INSERT INTO posts (title, content, author, author_id, category)
          VALUES($1, $2, $3, $4, $5);`,
-        [title, content, author, checkAuth.rows[0].id, category]
+        [title, content, author, id, category]
       )
       res.status(200)
     } else {
@@ -97,16 +96,16 @@ class PostController {
     )
 
     if (!!result.rows[0]) {
-      res.status(200)
-      res.send(result.rows[0])
+      res.status(200).json(result.rows)
     } else {
-      res.status(400)
+      res.status(200).json({likes: 0})
     }
     res.end()
   }
   //------------------------------------------------------//
   //
   async createNewComment(req, res) {
+
     const { author, content } = req.body
     const id = req.params.id
     const author_id = await db.query(
@@ -147,6 +146,10 @@ class PostController {
       [id]
     )
 
+    await db.query(
+      'DELETE FROM likes WHERE post_id=$1 AND author=$2;',
+      [id, author]
+    )
     if (!!author_id.rows[0] && !!postExist.rows[0]) {
       // const result =
       await db.query(
@@ -166,27 +169,10 @@ class PostController {
   //------------------------------------------------------//
   //
   async updateSpecified(req, res) {
-    let { title, content, category, author } = req.body
+    let { title, content, category } = req.body
     const id = req.params.id
-    const checkAuth = await db.query(
-      'SELECT id FROM users WHERE login=$1;',
-      [author]
-    )
-    const postAuth = await db.query(
-      'SELECT author_id FROM posts WHERE id=$1;',
-      [id]
-    )
-    const checkId = await db.query(
-      'SELECT * FROM posts WHERE id=$1;',
-      [id]
-    )
 
-    if (
-      !!checkAuth.rows[0] &&
-      category &&
-      checkId.rows[0] &&
-      postAuth.rows[0].author_id === checkAuth.rows[0].id
-    ) {
+    try {
       category = '{' + category.join() + '}'
       await db.query(
         `UPDATE posts SET title=$1, content=$2, category=$3
@@ -194,9 +180,9 @@ class PostController {
         [title, content, category, id]
       )
       res.status(200)
-    } else {
+    } catch(err) {
       // res.send('err, id not found')
-      res.status(400)
+      res.status(400).json({message: err})
     }
     res.end()
   }
